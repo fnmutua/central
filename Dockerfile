@@ -40,20 +40,27 @@ LABEL org.opencontainers.image.source="https://github.com/getodk/central"
 WORKDIR /usr/odk
 
 COPY server/package*.json ./
+
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     gpg \
     cron \
     wait-for-it \
     gettext \
     procps \
     netcat-traditional \
-    && apt-get install -y --no-install-recommends \
-    curl \
     && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
-    && apt-get install -y --no-install-recommends postgresql-client-14 \
+    && apt-get install -y --no-install-recommends postgresql-client-13 \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js dependencies
+RUN npm clean-install --omit=dev --no-audit --fund=false --update-notifier=false
+
+# Add the rest of your Dockerfile here
 
 COPY server/ ./
 COPY files/service/scripts/ ./
