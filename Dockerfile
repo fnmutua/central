@@ -8,9 +8,10 @@ RUN apt-get update \
         ca-certificates \
         curl \
         gpg \
+        lsb-release \
     && rm -rf /var/lib/apt/lists/* \
     && update-ca-certificates
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(grep -oP 'VERSION_CODENAME=\K\w+' /etc/os-release)-pgdg main" \
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" \
       | tee /etc/apt/sources.list.d/pgdg.list \
     && curl https://www.postgresql.org/media/keys/ACCC4CF8.asc \
       | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
@@ -51,10 +52,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gettext \
     procps \
     netcat-traditional \
-    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends postgresql-client-14 \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+
+RUN echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client-14 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js dependencies
