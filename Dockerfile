@@ -40,22 +40,20 @@ LABEL org.opencontainers.image.source="https://github.com/getodk/central"
 WORKDIR /usr/odk
 
 COPY server/package*.json ./
-COPY --from=pgdg /etc/apt/sources.list.d/pgdg.list \
-    /etc/apt/sources.list.d/pgdg.list
-COPY --from=pgdg /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg \
-    /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
-RUN apt-get update \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gpg \
+    cron \
+    wait-for-it \
+    gettext \
+    procps \
+    netcat-traditional \
     && apt-get install -y --no-install-recommends \
-        gpg \
-        cron \
-        wait-for-it \
-        gettext \
-        procps \
-        postgresql-client-17 \
-        netcat-traditional \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm clean-install --omit=dev --no-audit \
-        --fund=false --update-notifier=false
+    curl \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client-14 \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY server/ ./
 COPY files/service/scripts/ ./
