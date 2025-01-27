@@ -51,7 +51,7 @@ RUN apt-get update \
         wait-for-it \
         gettext \
         procps \
-        postgresql-client-13 \
+        postgresql-client-17 \
         netcat-traditional \
     && rm -rf /var/lib/apt/lists/* \
     && npm clean-install --omit=dev --no-audit \
